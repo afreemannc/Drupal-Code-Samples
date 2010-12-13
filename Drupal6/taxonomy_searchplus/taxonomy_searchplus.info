@@ -1,0 +1,4 @@
+name = Taxonomy Search Plus
+description = Provides enhancements for the taxonomy term fields in the advanced search form.
+package = Other
+core = 6.x

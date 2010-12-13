@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * Implements hook_form_alter().
+ */
+function taxonomy_searchplus_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'search_form') {
+    $options = array();
+    $form['advanced']['category']['#type'] = 'hidden';
+    unset($form['advanced']['category']['#options']);
+
+    $results = db_query('SELECT vid, name FROM {vocabulary}');
+
+    $form['advanced']['vocabularies'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Only in category(s)'),
+    );
+
+    while ($vocabulary = db_fetch_object($results)) {
+      $tree = taxonomy_get_tree($vocabulary->vid);
+      if ($tree && (count($tree) > 0)) {
+        $options = array();
+        foreach ($tree as $term) {
+          $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
+        }
+      }
+
+      $form['advanced']['vocabularies']["vocabulary_$vocabulary->vid"] = array(
+        '#type' => 'select',
+        '#title' => t($vocabulary->name . " vocabulary"),
+        '#options' => $options,
+        '#multiple' => TRUE,
+        '#prefix' => '<div class="criterion">',
+        '#suffix' => '</div>',
+      );
+    }
+    
+    $form['#validate'] = array_merge(array('taxonomy_searchplus_validate'), $form['#validate']);
+  }
+}
+
+/**
+ * Validates advanced search form submission, merges selected tid's into $form_state['values']['category']
+ * thus sidestepping the need to implement hook_search().
+ */
+function taxonomy_searchplus_validate($form, &$form_state) {
+  $results = db_query('SELECT vid FROM {vocabulary}');
+  while ($vid = db_result($results)) {
+    if (is_array($form_state['values']["vocabulary_" . $vid])) {
+      if (!is_array($form_state['values']['category'])) {
+        $form_state['values']['category'] = array();
+      }
+      $form_state['values']['category'] = array_merge(array_values($form_state['values']["vocabulary_$vid"]), $form_state['values']['category']); 
+    }
+  }
+}
