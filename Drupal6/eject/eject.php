@@ -102,6 +102,7 @@ available databases below. Eject Eject Eject will only try to export the databas
 you need.</p>
 <form action="" method="GET">
 <?php
+   $eject_conf = variable_get('eject_conf', '');
    $site_dirs = dir('sites');
    while (($file = $site_dirs->read()) !== FALSE) {
 
@@ -149,7 +150,8 @@ the file(s) listed below before proceeding to the next step.</p>
     foreach ($databases as $database) {
       if (!strcmp($_GET[$database['path']], 'on')) {
         if ($eject_conf['mysqldump_location']) {
-          $dump_string = $eject_conf['mysqldump_location'] . ' -u ' . $database['user'];
+          $cmd = preg_replace('/mysqldump/', './mysqldump', $eject_conf['mysqldump_location']);
+          $dump_string = $cmd . ' -u ' . $database['user'];
         }
         else {
           $dump_string = 'mysqldump -u ' . $database['user'];
@@ -266,6 +268,7 @@ function eject_find_function($function, &$prerequisites) {
 }
 
 function eject_find_cli($command, &$prerequisites) {
+  $eject_conf = variable_get('eject_conf', '');
   if(!isset($prerequisites['errors'])) {
     $prerequisites['errors'] = 0;
   }
@@ -273,7 +276,7 @@ function eject_find_cli($command, &$prerequisites) {
   system("$command", $ret);
   $output = ob_get_contents();
   ob_end_clean();
-  $command = preg_replace('/--\w+$/', '', $command);
+  $command = trim(preg_replace('/--\w+$/', '', $command));
   if ($ret == 127) {
     $locations = explode("\n", `locate $command`);
     if (!count($locations)) {
@@ -281,15 +284,19 @@ function eject_find_cli($command, &$prerequisites) {
       $prerequisites['errors'] = 1;
       $prerequisites['commands'][] = t('@command is missing or unavailable!', array('@command' => $command));
     }
-    foreach ($locations as $location) {
-      if (preg_match('/' . $command . '$/', $location)) {
-        $eject_conf[$command . '_location'] = $location;
-        $prerequisites['commands'][] = t('@command found at @path', array('@command' => $command, '@path' => $eject_conf['mysqldump_location']));
+    else {
+      foreach ($locations as $location) {
+        if (preg_match('/' . $command . '$/', $location) && file_exists($location)) {
+          drupal_set_message('location found:' . $location);
+          $eject_conf[$command . '_location'] = $location;
+          $prerequisites['commands'][] = t('@command found at @path', array('@command' => $command, '@path' => $location));
+        }
       }
     }
   }
   elseif ($ret === 0) {
     $prerequisites['commands'][] = t('@command is available and on $PATH', array('@command' => $command));
   }
+  variable_set('eject_conf', $eject_conf);
 }
 ?>
