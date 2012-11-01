@@ -1,0 +1,7 @@
+name = Mailtron 5000
+description = Templatable HTML/text emails on demand
+core = 6.x
+package = Other
+dependencies[] = mimemail
+dependencies[] = content
+version =  6.x-1.0-dev

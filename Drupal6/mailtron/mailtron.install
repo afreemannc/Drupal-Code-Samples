@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * @file database schema and install/uninstall functions.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function mailtron_install() {
+  drupal_install_schema('mailtron');
+}
+
+
+/**
+ * Implements hook_uninstall().
+ */
+function mailtron_uninstall() {
+  drupal_uninstall_schema('mailtron');
+}
+
+/**
+ * Implements hook_schema().
+ */
+function mailtron_schema() {
+  $schema = array();
+  $schema['mailtron'] = array(
+    'fields' => array(
+      'mid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,  
+      ),
+      'tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'module' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'from_name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'from_mail' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'recipients' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'cc' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'bcc' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'subject' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'html_body' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ), 
+      'html_body_format' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ), 
+      'text_body' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'send_callback' => array(
+        'description' => 'optional callback function to execute when mail is sent.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'recipient_callback' => array(
+        'description' => 'optional callback function called to retrieve recipient.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('mid'),
+  );
+  return $schema;
+}
+

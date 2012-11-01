@@ -1,0 +1,6 @@
+name = Mailtron 5000 example module
+description = Working example module useful for getting a feel for working with Mailtron 5000.
+core = 6.x
+package = Other
+dependencies[] = mailtron
+version =  6.x-1.0-dev

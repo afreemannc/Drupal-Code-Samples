@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Implements hook_perm().
+ */
+function mailtron_perm() {
+  return array('administer mail configuration');
+}
+
+
+// TODO: design build-a-mail admin interface, may include trigger/action/rules integration.
+/**
+ * Implements hook_menu().
+ */
+/*function mailtron_menu() {
+  $items = array();
+  $items['admin/build/mailtron'] = array(
+    'title' => '',
+    'description' => '',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => 'mailtron_admin',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'mailtron.admin.inc',
+  );
+  // TODO: ahah callback for template selection.
+  // TODO: modal callback for preview window.
+  return $items;
+}*/
+
+
+/**
+ * Add a record to the db.
+ */
+function mailtron_save($settings) {
+  drupal_write_record('mailtron', $settings);
+}
+
+/**
+ * Update an existing record.
+ */
+function mailtron_update($settings) {
+  drupal_write_record('mailtron', $settings, 'mid');
+}
+
+/**
+ * Delete existing record(s).
+ */
+function mailtron_delete($settings) {
+  db_query('DELETE FROM {mailtron} WHERE mid = %d', $settings['mid']);
+}
